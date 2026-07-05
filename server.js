@@ -3,9 +3,11 @@ const puppeteer = require('puppeteer');
 const archiver = require('archiver');
 const fs = require('fs');
 const path = require('path');
+const os = require('os'); // Added to find the safe system temporary directory
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+// Hugging Face strictly routes all traffic through internal port 7860
+const PORT = process.env.PORT || 7860;
 
 app.use(express.json());
 app.use(express.static('public'));
@@ -15,10 +17,14 @@ app.post('/api/screenshot', async (req, res) => {
   if (!url) return res.status(400).json({ error: 'URL is required' });
 
   const timestamp = Date.now();
+  // Find the system temp directory where the 'node' user account has absolute write permissions
+  const tmpDir = os.tmpdir();
+  
   const files = {
-    hero: path.join(__dirname, `desktop-hero-${timestamp}.webp`),
-    full: path.join(__dirname, `desktop-fullpage-${timestamp}.webp`),
-    mobile: path.join(__dirname, `mobile-hero-${timestamp}.webp`)
+    hero: path.join(tmpDir, `desktop-hero-${timestamp}.webp`),
+    full: path.join(tmpDir, `desktop-fullpage-${timestamp}.webp`),
+    mobile: path.join(tmpDir, `mobile-hero-${timestamp}.webp`),
+    zip: path.join(tmpDir, `portfolio-assets-${timestamp}.zip`)
   };
 
   let browser;
@@ -52,19 +58,18 @@ app.post('/api/screenshot', async (req, res) => {
 
     await browser.close();
 
-    // Create ZIP package
-    const zipPath = path.join(__dirname, `portfolio-assets-${timestamp}.zip`);
-    const output = fs.createWriteStream(zipPath);
+    // Create ZIP package inside the writable temporary directory
+    const output = fs.createWriteStream(files.zip);
     const archive = archiver('zip', { zlib: { level: 9 } });
 
     output.on('close', () => {
-      res.download(zipPath, 'portfolio-assets.zip', (err) => {
-        // Clean up all cached files from server memory
+      res.download(files.zip, 'portfolio-assets.zip', (err) => {
+        // Clean up all cached files from the system temp directory
         try {
-          fs.unlinkSync(files.hero);
-          fs.unlinkSync(files.full);
-          fs.unlinkSync(files.mobile);
-          fs.unlinkSync(zipPath);
+          if (fs.existsSync(files.hero)) fs.unlinkSync(files.hero);
+          if (fs.existsSync(files.full)) fs.unlinkSync(files.full);
+          if (fs.existsSync(files.mobile)) fs.unlinkSync(files.mobile);
+          if (fs.existsSync(files.zip)) fs.unlinkSync(files.zip);
         } catch (cleanupErr) {
           console.error('Cleanup error:', cleanupErr);
         }
