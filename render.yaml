@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: asset-bot-4k-mockup
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: npm install && npx puppeteer browsers install chrome
+    startCommand: node server.js
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PUPPETEER_SKIP_CHROMIUM_DOWNLOAD
+        value: "false"
+      - key: PUPPETEER_CACHE_DIR
+        value: /opt/render/.cache/puppeteer
