@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ASSET_BOT // 4K MOCKUP</title>
+    <meta
+      name="description"
+      content="Automated 4K WebP portfolio mockup generator powered by Puppeteer."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;500;900&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      html, body {
+        background: #0c0c0c;
+        font-family: "Kanit", sans-serif;
+        color: #d7e2ea;
+      }
+      .display-gradient {
+        background: linear-gradient(180deg, #646973 0%, #bbccd7 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+      }
+      .cta-mesh {
+        background: linear-gradient(
+          123deg,
+          #18011f 7%,
+          #b600a8 37%,
+          #7621b0 72%,
+          #be4c00 100%
+        );
+        box-shadow: 0 8px 40px -8px rgba(182, 0, 168, 0.5);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+      .cta-mesh:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 50px -10px rgba(182, 0, 168, 0.75);
+      }
+      .cta-mesh:active { transform: translateY(0); }
+
+      input.glow-input {
+        background: transparent;
+        border: 1px solid rgba(215, 226, 234, 0.2);
+        transition: border-color 0.25s, box-shadow 0.25s;
+      }
+      input.glow-input:focus {
+        outline: none;
+        border-color: rgba(215, 226, 234, 0.55);
+        box-shadow: 0 0 30px -5px rgba(182, 0, 168, 0.35);
+      }
+
+      @keyframes orbit {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      @keyframes pulseCore {
+        0%, 100% { opacity: 0.35; transform: scale(0.95); }
+        50%      { opacity: 1;    transform: scale(1.05); }
+      }
+      @keyframes fadeSlide {
+        0%   { opacity: 0; transform: translateY(6px); }
+        100% { opacity: 1; transform: translateY(0); }
+      }
+
+      .ring {
+        position: absolute; inset: 0;
+        border-radius: 9999px;
+        border: 1px solid rgba(215, 226, 234, 0.15);
+      }
+      .ring.spin {
+        border-top-color: #b600a8;
+        border-right-color: #7621b0;
+        animation: orbit 1.6s linear infinite;
+      }
+      .ring.spin-slow {
+        border-bottom-color: #be4c00;
+        animation: orbit 3.2s linear infinite reverse;
+        inset: 12px;
+      }
+      .core {
+        background: radial-gradient(circle, #b600a8 0%, #18011f 70%);
+        animation: pulseCore 2.2s ease-in-out infinite;
+      }
+      .status-text { animation: fadeSlide 0.5s ease both; }
+
+      .grain::before {
+        content: "";
+        position: fixed; inset: 0; pointer-events: none;
+        background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
+        background-size: 3px 3px;
+        mix-blend-mode: overlay;
+        z-index: 0;
+      }
+    </style>
+  </head>
+  <body class="grain min-h-screen flex flex-col">
+    <main class="relative z-10 flex-1 flex flex-col items-center justify-center px-6 py-16">
+      <div class="max-w-4xl w-full text-center">
+        <p class="text-xs tracking-[0.4em] text-[#646973] font-light mb-6">
+          // AUTOMATED VISUAL PIPELINE
+        </p>
+
+        <h1
+          class="display-gradient font-black uppercase tracking-tight leading-[0.9] text-6xl sm:text-7xl md:text-8xl"
+        >
+          ASSET_BOT<br />// 4K MOCKUP
+        </h1>
+
+        <p class="mt-8 text-[#8a94a0] font-light max-w-xl mx-auto text-base sm:text-lg">
+          Drop any live URL. Our headless engine renders razor-sharp Retina WebP
+          mockups — desktop hero, full page, and mobile — bundled instantly.
+        </p>
+
+        <form id="form" class="mt-14 flex flex-col items-center gap-6">
+          <input
+            id="urlInput"
+            type="text"
+            required
+            placeholder="https://your-portfolio.com"
+            class="glow-input w-full max-w-2xl px-6 py-5 rounded-full text-center text-lg text-[#d7e2ea] placeholder-[#4a5058] font-light"
+          />
+          <button
+            type="submit"
+            class="cta-mesh px-10 py-5 rounded-full text-white font-black uppercase tracking-wider text-sm"
+          >
+            Generate 4K Portfolio WebP
+          </button>
+        </form>
+
+        <div id="loader" class="hidden mt-14 flex flex-col items-center gap-10">
+          <div class="relative w-40 h-40">
+            <div class="ring"></div>
+            <div class="ring spin"></div>
+            <div class="ring spin-slow"></div>
+            <div class="absolute inset-[38%] rounded-full core"></div>
+          </div>
+          <p
+            id="status"
+            class="status-text text-[#bbccd7] uppercase tracking-[0.3em] text-xs sm:text-sm font-light"
+          >
+            Initializing...
+          </p>
+        </div>
+
+        <p id="error" class="hidden mt-8 text-red-400 text-sm font-light"></p>
+      </div>
+    </main>
+
+    <footer class="relative z-10 py-6 text-center text-[#3a3f47] text-[10px] tracking-[0.3em] uppercase">
+      Powered by Haseeb Altaf
+    </footer>
+
+    <script>
+      const form = document.getElementById("form");
+      const loader = document.getElementById("loader");
+      const statusEl = document.getElementById("status");
+      const errorEl = document.getElementById("error");
+
+      const STATES = [
+        "Launching browser instance...",
+        "Setting viewport grid...",
+        "Rendering high-fidelity WebP layers...",
+        "Compiling ZIP payload...",
+      ];
+
+      let stateTimer = null;
+      function cycleStates() {
+        let i = 0;
+        statusEl.textContent = STATES[0];
+        stateTimer = setInterval(() => {
+          i = (i + 1) % STATES.length;
+          statusEl.style.animation = "none";
+          void statusEl.offsetWidth;
+          statusEl.style.animation = "";
+          statusEl.textContent = STATES[i];
+        }, 2800);
+      }
+      function stopStates() {
+        if (stateTimer) clearInterval(stateTimer);
+        stateTimer = null;
+      }
+
+      function resetUI() {
+        stopStates();
+        loader.classList.add("hidden");
+        form.classList.remove("hidden");
+      }
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        errorEl.classList.add("hidden");
+        errorEl.textContent = "";
+        const url = document.getElementById("urlInput").value.trim();
+        if (!url) return;
+
+        form.classList.add("hidden");
+        loader.classList.remove("hidden");
+        cycleStates();
+
+        try {
+          const res = await fetch("/api/generate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ url }),
+          });
+          if (!res.ok) {
+            const msg = await res.json().catch(() => ({ error: "Failed." }));
+            throw new Error(msg.error || "Generation failed.");
+          }
+          const blob = await res.blob();
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          link.download = "portfolio-assets.zip";
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          URL.revokeObjectURL(link.href);
+        } catch (err) {
+          errorEl.textContent = err.message || "Something went wrong.";
+          errorEl.classList.remove("hidden");
+        } finally {
+          resetUI();
+        }
+      });
+    </script>
+  </body>
+</html>
