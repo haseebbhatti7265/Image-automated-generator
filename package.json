@@ -1,0 +1,18 @@
+{
+  "name": "asset-bot-4k-mockup",
+  "version": "1.0.0",
+  "description": "Puppeteer-powered 4K WebP portfolio screenshot generator.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "postinstall": "npx puppeteer browsers install chrome"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "archiver": "^7.0.1",
+    "express": "^4.19.2",
+    "puppeteer": "^23.5.0"
+  }
+}
